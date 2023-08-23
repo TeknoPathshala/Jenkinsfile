@@ -28,7 +28,8 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build("my-ai-app:27", context: ".", dockerfile: "Dockerfile")
+                    def dockerImage = docker.build("my-ai-app:27", "--file Dockerfile .")
+                    echo "Docker image built: ${dockerImage.id}"
                 }
             }
         }
