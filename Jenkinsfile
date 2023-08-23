@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        PATH = "${tool(name: 'venv', type: 'hudson.plugins.virtualenv.VirtualenvBuilder')}/bin:$PATH"
+        PATH = "$WORKSPACE/venv/bin:$PATH"
     }
     stages {
         stage('Checkout SCM') {
@@ -9,17 +9,20 @@ pipeline {
                 checkout scm
             }
         }
+        stage('Setup Virtual Environment') {
+            steps {
+                script {
+                    sh 'python3 -m venv venv'
+                    sh 'source venv/bin/activate'
+                    sh 'pip install -U pip'
+                    sh 'pip install -r requirements.txt'
+                }
+            }
+        }
         stage('Build and Test') {
             steps {
                 script {
-                    try {
-                        sh 'python -m venv venv'
-                        sh './venv/bin/activate'
-                        sh 'pip install -r requirements.txt'
-                        sh 'python your_script.py'
-                    } finally {
-                        sh 'deactivate'
-                    }
+                    sh 'python your_script.py'
                 }
             }
         }
@@ -34,7 +37,7 @@ pipeline {
     }
     post {
         always {
-            sh 'docker logout https://hub.docker.com'
+            sh 'docker logout https://registry.example.com'
         }
     }
 }
