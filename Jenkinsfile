@@ -26,7 +26,9 @@ pipeline {
     post {
         always {
             // Deactivate virtual environment
-            sh 'deactivate'
+            node {
+                sh 'deactivate'
+            }
         }
     }
 }
