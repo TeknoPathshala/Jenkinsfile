@@ -1,3 +1,3 @@
 numpy
-tensorflow v2.13.0 
+tensorflow=v2.13.0 
 # Add other dependencies here
