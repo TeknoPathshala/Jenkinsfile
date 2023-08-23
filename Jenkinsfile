@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     stages {
-        stage('Checkout') {
+        stage('Checkout SCM') {
             steps {
                 checkout scm
             }
@@ -11,44 +11,57 @@ pipeline {
         stage('Build and Test') {
             steps {
                 script {
-                    try {
-                        sh 'python3 -m venv venv'
-                        sh './venv/bin/python -m pip install -r requirements.txt'
-                        sh './venv/bin/python your_script.py'
-                    } catch (Exception e) {
-                        currentBuild.result = 'FAILURE'
-                        error("Build and test failed: ${e.getMessage()}")
+                    def venv = virtualenv(
+                        python: 'python3',
+                        requirementsPath: 'requirements.txt'
+                    )
+                    sh "${venv}/bin/pip install -r requirements.txt"
+                    sh "python your_script.py"
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    docker.withRegistry('', 'my-docker-credentials') {
+                        def dockerImage = docker.build(context: '.', dockerfile: 'Dockerfile', tag: 'my-ai-app:27')
                     }
                 }
             }
         }
-        
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    def dockerImage = docker.build("my-ai-app:${env.BUILD_NUMBER}", 
-                                    context: '.',       // Specify the context as the current directory
-                                    dockerfile: 'Dockerfile')  // Specify the Dockerfile filename
-                }
-            }
-        }
-        
+
         stage('Push Docker Image') {
             steps {
                 script {
-                    docker.withRegistry('', 'docker-hub-credentials') {
+                    docker.withRegistry('', 'my-docker-credentials') {
                         dockerImage.push()
                     }
                 }
             }
         }
-        
+
         stage('Deploy') {
             steps {
                 script {
-                    sh 'docker run -d -p 8080:80 my-ai-app:${env.BUILD_NUMBER}'
+                    // Your deployment steps here
                 }
             }
         }
     }
+    
+    post {
+        always {
+            cleanWs()
+        }
+    }
+}
+
+def virtualenv(Map configMap) {
+    return tool name: 'venv', type: 'hudson.plugins.virtualenv.VirtualenvBuilder', properties: [
+        $class: 'hudson.plugins.virtualenv.VirtualenvToolProperty', 
+        locations: [
+            [home: configMap['python']]
+        ]
+    ]
 }
