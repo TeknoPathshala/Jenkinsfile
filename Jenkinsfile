@@ -32,11 +32,21 @@ pipeline {
                 }
             }
         }
-        // Other stages here...
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    withCredentials([string(credentialsId: 'my-registry-credentials', variable: 'DOCKER_LOGIN')]) {
+                        sh "docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD https://hub.docker.com"
+                        sh 'docker push my-ai-app:27'
+                    }
+                }
+            }
+        }
+        // Add more stages as needed...
     }
     post {
         always {
-            sh 'docker logout https://registry.example.com'
+            sh 'docker logout https://hub.docker.com'
         }
     }
 }
