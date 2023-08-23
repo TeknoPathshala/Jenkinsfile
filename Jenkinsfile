@@ -1,67 +1,41 @@
 pipeline {
     agent any
-
+    environment {
+        PATH = "${tool(name: 'venv', type: 'hudson.plugins.virtualenv.VirtualenvBuilder')}/bin:$PATH"
+    }
     stages {
         stage('Checkout SCM') {
             steps {
                 checkout scm
             }
         }
-        
-        stage('Build and Test') {
+        stage('Setup Virtual Environment') {
             steps {
                 script {
-                    def venv = virtualenv(
-                        python: 'python3',
-                        requirementsPath: 'requirements.txt'
-                    )
-                    sh "${venv}/bin/pip install -r requirements.txt"
-                    sh "python your_script.py"
+                    sh '''
+                        virtualenv venv
+                        source venv/bin/activate
+                        pip install -r requirements.txt
+                    '''
                 }
             }
         }
-
-        stage('Build Docker Image') {
+        stage('Build and Push Docker Image') {
             steps {
                 script {
-                    docker.withRegistry('', 'my-docker-credentials') {
-                        def dockerImage = docker.build(context: '.', dockerfile: 'Dockerfile', tag: 'my-ai-app:27')
-                    }
-                }
-            }
-        }
-
-        stage('Push Docker Image') {
-            steps {
-                script {
-                    docker.withRegistry('', 'my-docker-credentials') {
+                    def dockerImage = docker.build("my-image:${BUILD_NUMBER}")
+                    docker.withRegistry('https://hub.docker.com', 'my-registry-credentials') {
                         dockerImage.push()
                     }
                 }
             }
         }
-
-        stage('Deploy') {
-            steps {
-                script {
-                    // Your deployment steps here
-                }
-            }
-        }
+        // Add more stages if needed
     }
-    
     post {
         always {
-            cleanWs()
+            sh 'docker logout https://hub.docker.com'
+            sh 'deactivate'
         }
     }
-}
-
-def virtualenv(Map configMap) {
-    return tool name: 'venv', type: 'hudson.plugins.virtualenv.VirtualenvBuilder', properties: [
-        $class: 'hudson.plugins.virtualenv.VirtualenvToolProperty', 
-        locations: [
-            [home: configMap['python']]
-        ]
-    ]
 }
