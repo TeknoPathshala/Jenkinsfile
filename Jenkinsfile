@@ -13,16 +13,15 @@ pipeline {
             steps {
                 script {
                     sh 'python3 -m venv venv'
-                    sh 'source venv/bin/activate'
-                    sh 'pip install -U pip'
-                    sh 'pip install -r requirements.txt'
+                    sh 'venv/bin/pip install -U pip'
+                    sh 'venv/bin/pip install -r requirements.txt'
                 }
             }
         }
         stage('Build and Test') {
             steps {
                 script {
-                    sh 'python your_script.py'
+                    sh 'venv/bin/python your_script.py'
                 }
             }
         }
