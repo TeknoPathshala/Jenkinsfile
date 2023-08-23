@@ -11,7 +11,12 @@ pipeline {
         stage('Build and Test') {
             steps {
                 script {
-                    sh 'python your_script.py'
+                    try {
+                        sh 'python3 your_script.py'
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        error("Build and test failed: ${e.getMessage()}")
+                    }
                 }
             }
         }
