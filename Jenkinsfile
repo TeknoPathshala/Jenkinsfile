@@ -1,14 +1,18 @@
 pipeline {
-    agent any
+    agent none // Set to 'none' as you're using custom Docker image
 
     stages {
         stage('Checkout') {
+            agent any // Use 'any' here or specify a specific label
+
             steps {
                 checkout scm
             }
         }
 
         stage('Build Docker Image') {
+            agent any // Use 'any' here or specify a specific label
+
             steps {
                 script {
                     // Activate virtual environment if needed
