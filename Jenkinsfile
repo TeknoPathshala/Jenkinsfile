@@ -12,9 +12,9 @@ pipeline {
             steps {
                 script {
                     try {
-                        sh 'python3 -m venv venv'                 // Create a virtual environment
-                        sh './venv/bin/python -m pip install -r requirements.txt'  // Install dependencies
-                        sh './venv/bin/python your_script.py'     // Execute the script using the venv's Python interpreter
+                        sh 'python3 -m venv venv'
+                        sh './venv/bin/python -m pip install -r requirements.txt'
+                        sh './venv/bin/python your_script.py'
                     } catch (Exception e) {
                         currentBuild.result = 'FAILURE'
                         error("Build and test failed: ${e.getMessage()}")
@@ -26,7 +26,9 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    def dockerImage = docker.build("my-ai-app:${env.BUILD_NUMBER}")
+                    def dockerImage = docker.build("my-ai-app:${env.BUILD_NUMBER}", 
+                                    context: '.',       // Specify the context as the current directory
+                                    dockerfile: 'Dockerfile')  // Specify the Dockerfile filename
                 }
             }
         }
