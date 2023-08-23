@@ -12,7 +12,8 @@ pipeline {
             steps {
                 script {
                     try {
-                        sh 'python3 your_script.py'
+                        sh 'pip3 install -r requirements.txt'  // Install dependencies
+                        sh 'python3 your_script.py'            // Execute the script
                     } catch (Exception e) {
                         currentBuild.result = 'FAILURE'
                         error("Build and test failed: ${e.getMessage()}")
