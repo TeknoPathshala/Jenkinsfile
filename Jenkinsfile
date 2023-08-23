@@ -34,10 +34,7 @@ pipeline {
     }
     post {
         always {
-            node {
-                sh 'docker logout https://hub.docker.com'
-                sh 'deactivate'
-            }
+            sh 'docker logout https://hub.docker.com'
         }
     }
 }
