@@ -2,7 +2,6 @@ pipeline {
     agent any
     environment {
         PATH = "$WORKSPACE/venv/bin:$PATH"
-        DOCKER_REGISTRY_URL = 'https://hub.docker.com'
     }
     stages {
         stage('Checkout SCM') {
@@ -29,18 +28,14 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    withDockerRegistry(credentialsId: 'dckr_pat_CfOfgxvISm51upG5dWII9Ay5-CI', url: 'https://hub.docker.com') {
-                        def customImage = docker.build("my-ai-app:27", "-f Dockerfile .")
-                    }
+                    sh 'docker build -t my-ai-app:27 --file Dockerfile .'
                 }
             }
         }
-        stage('Push Docker Image') {
+        stage('Run Docker Container') {
             steps {
                 script {
-                    withDockerRegistry(credentialsId: 'dckr_pat_CfOfgxvISm51upG5dWII9Ay5-CI', url: 'https://hub.docker.com') {
-                        sh 'docker push my-ai-app:27'
-                    }
+                    sh 'docker run -d -p 8080:80 my-ai-app:27'
                 }
             }
         }
@@ -48,7 +43,7 @@ pipeline {
     post {
         always {
             script {
-                sh 'docker logout https://hub.docker.com'
+                sh 'docker ps -a'  // Show the list of running containers for verification
             }
         }
     }
