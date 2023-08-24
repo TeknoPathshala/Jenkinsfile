@@ -29,7 +29,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    withDockerRegistry(credentialsId: 'dckr_pat_CfOfgxvISm51upG5dWII9Ay5-CI', url: http://hub.docker.com) {
+                    withDockerRegistry(credentialsId: 'dckr_pat_CfOfgxvISm51upG5dWII9Ay5-CI', url: 'https://hub.docker.com') {
                         def customImage = docker.build("my-ai-app:27", "-f Dockerfile .")
                     }
                 }
@@ -38,7 +38,7 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
-                    withDockerRegistry(credentialsId: 'dckr_pat_CfOfgxvISm51upG5dWII9Ay5-CI', url: http://hub.docker.com) {
+                    withDockerRegistry(credentialsId: 'dckr_pat_CfOfgxvISm51upG5dWII9Ay5-CI', url: 'https://hub.docker.com') {
                         sh 'docker push my-ai-app:27'
                     }
                 }
