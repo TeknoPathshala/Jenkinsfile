@@ -35,7 +35,7 @@ pipeline {
         stage('Run Docker Container') {
             steps {
                 script {
-                    sh 'docker run -d -p 8081:80 my-ai-app:27'
+                    sh 'docker run -d -p 8081:8080 my-ai-app:27'
                 }
             }
         }
