@@ -2,6 +2,8 @@ pipeline {
     agent any
     environment {
         PATH = "$WORKSPACE/venv/bin:$PATH"
+        DOCKER_REGISTRY_URL = credentials('my-registry-credentials')
+        DOCKER_REGISTRY_CREDENTIALS = credentials('my-registry-credentials')
     }
     stages {
         stage('Checkout SCM') {
@@ -28,8 +30,9 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    def dockerImage = docker.build("my-ai-app:27", "--file Dockerfile .")
-                    echo "Docker image built: ${dockerImage.id}"
+                    withCredentials([string(credentialsId: "${DOCKER_REGISTRY_CREDENTIALS}", variable: 'DOCKER_REGISTRY_CREDS')]) {
+                        docker.withRegistry("${DOCKER_REGISTRY_URL}", "docker") {
+                            def customImage = docker.build("my-ai-app:27", "-f Dockerfile .")
                 }
             }
         }
