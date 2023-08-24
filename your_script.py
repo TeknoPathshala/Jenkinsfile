@@ -3,6 +3,7 @@ import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
+from flask import Flask, request, jsonify
 
 # Load and preprocess the dataset
 (train_images, train_labels), (test_images, test_labels) = keras.datasets.cifar10.load_data()
@@ -25,20 +26,20 @@ model.compile(optimizer='adam',
 # Train the model
 model.fit(train_images, train_labels, epochs=10)
 
-# Evaluate the model
-test_loss, test_acc = model.evaluate(test_images, test_labels, verbose=2)
-print('\nTest accuracy:', test_acc)
+# Create a Flask app
+app = Flask(__name__)
 
 # Class labels
 class_names = ['Airplane', 'Automobile', 'Bird', 'Cat', 'Deer',
                'Dog', 'Frog', 'Horse', 'Ship', 'Truck']
 
-# Make predictions
-probability_model = tf.keras.Sequential([model, tf.keras.layers.Softmax()])
-predictions = probability_model.predict(test_images)
+@app.route('/predict', methods=['POST'])
+def predict():
+    image = np.array(request.json['image'])
+    image = image.reshape((1, 32, 32, 3))
+    predicted_probabilities = model.predict(image)
+    predicted_class = np.argmax(predicted_probabilities)
+    return jsonify({'predicted_class': class_names[predicted_class]})
 
-# Print sample predictions
-for i in range(5):
-    predicted_class = np.argmax(predictions[i])
-    actual_class = test_labels[i][0]
-    print(f"Predicted: {class_names[predicted_class]} | Actual: {class_names[actual_class]}")
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=8081)
