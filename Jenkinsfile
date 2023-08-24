@@ -18,24 +18,10 @@ pipeline {
                 }
             }
         }
-        stage('Build and Test') {
+        stage('Run Flask Web Server') {
             steps {
                 script {
-                    sh 'venv/bin/python your_script.py'
-                }
-            }
-        }
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    sh 'docker build -t my-ai-app:27 --file Dockerfile .'
-                }
-            }
-        }
-        stage('Run Docker Container') {
-            steps {
-                script {
-                    sh 'docker run -d -p 8081:8080 my-ai-app:27'
+                    sh 'venv/bin/python your_script.py &'
                 }
             }
         }
@@ -43,7 +29,7 @@ pipeline {
     post {
         always {
             script {
-                sh 'docker ps -a'  // Show the list of running containers for verification
+                sh 'pkill -f your_script.py'
             }
         }
     }
