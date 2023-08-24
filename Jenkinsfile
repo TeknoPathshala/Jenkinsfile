@@ -30,16 +30,20 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    withCredentials([string(credentialsId: "${DOCKER_REGISTRY_CREDENTIALS}", variable: 'DOCKER_REGISTRY_CREDS')]) {
+                    withCredentials([string(credentialsId: "${DOCKER_REGISTRY_CREDENTIALS}", variable: 'DOCKER_LOGIN'),
+                                     string(credentialsId: "${DOCKER_REGISTRY_CREDENTIALS}", variable: 'DOCKER_PASSWORD')]) {
                         docker.withRegistry("${DOCKER_REGISTRY_URL}", "docker") {
                             def customImage = docker.build("my-ai-app:27", "-f Dockerfile .")
+                        }
+                    }
                 }
             }
         }
         stage('Push Docker Image') {
             steps {
                 script {
-                    withCredentials([string(credentialsId: 'my-registry-credentials', variable: 'DOCKER_LOGIN')]) {
+                    withCredentials([string(credentialsId: 'my-registry-credentials', variable: 'DOCKER_LOGIN'),
+                                     string(credentialsId: 'my-registry-credentials', variable: 'DOCKER_PASSWORD')]) {
                         sh "docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD https://hub.docker.com"
                         sh 'docker push my-ai-app:27'
                     }
