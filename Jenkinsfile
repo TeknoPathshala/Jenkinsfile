@@ -3,7 +3,7 @@ pipeline {
 
     stages {
         stage('Checkout') {
-            agent any // Use 'any' here or specify a specific label
+            agent any // Use 'any' here to run on any available agent
 
             steps {
                 checkout scm
@@ -11,7 +11,7 @@ pipeline {
         }
 
         stage('Build Docker Image') {
-            agent any // Use 'any' here or specify a specific label
+            agent any // Use 'any' here to run on any available agent
 
             steps {
                 script {
